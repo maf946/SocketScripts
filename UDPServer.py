@@ -17,8 +17,9 @@ print ("Press Ctrl+Z to quit. Listening...")
 
 while 1:
 	message, clientAddress = serverSocket.recvfrom(2048)
-	clientIP = str(clientAddress[0])
-	clientPort = str(clientAddress[1])
-	print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
-	modifiedMessage = message.upper()
-	serverSocket.sendto(modifiedMessage, clientAddress)
+	if message:
+		clientIP = str(clientAddress[0])
+		clientPort = str(clientAddress[1])
+		print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
+		modifiedMessage = message.upper()
+		serverSocket.sendto(modifiedMessage, clientAddress)
