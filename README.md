@@ -175,11 +175,12 @@ Let’s now take a look at the server side of the application:
 
 	while 1:
 		message, clientAddress = serverSocket.recvfrom(2048)
-		clientIP = str(clientAddress[0])
-		clientPort = str(clientAddress[1])
-		print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
-		modifiedMessage = message.upper()
-		serverSocket.sendto(modifiedMessage, clientAddress)
+		if message: 
+			clientIP = str(clientAddress[0])
+			clientPort = str(clientAddress[1])
+			print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
+			modifiedMessage = message.upper()
+			serverSocket.sendto(modifiedMessage, clientAddress)
 	
 As with UDPClient.py, we begin by importing the socket module.
 
@@ -217,20 +218,24 @@ UDPServer.py is going to do what servers do: sit around, run (hopefully) indefin
 	
 This line of code is similar to what we saw in UDPClient. When a packet arrives at the server’s socket, the packet’s data is put into the variable `message` and the packet’s source address is put into the variable clientAddress. The variable `clientAddress` contains both the client’s IP address and the client’s port number. Here, UDPServer _will_ make use of this address information, as it provides a return address, similar to the return address with ordinary postal mail. With this source address information, the server now knows to where it should direct its reply.
 
-		clientIP = str(clientAddress[0])
-		clientPort = str(clientAddress[1])
+		if message: 
+		
+Sometimes we may receive a "blank" message, such as if a user sends a blank message, or if a port-scanning tool like `nmap` is scanning for open ports by sending 0-length packets. The `if` line here checks if the message is _not_ empty; as long as it's not empty, all of the lines that are below it and indented (i.e., the rest of the script), will run. Otherwise, it just loops back to the top of the `while` block.
+
+			clientIP = str(clientAddress[0])
+			clientPort = str(clientAddress[1])
 
 These lines aren't strictly necessary in order to send a reply packet, but we're including them here because it will be nice for us to be able to print the `clientIP` and `clientPort` values to the terminal window. Here, we are extracting those two parts from the `clientAddress` array, converting them to strings, and storing them in new variables.
 
-		print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
+			print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
 		
 Again, it's not strictly necessary, but it's nice to be able to show a "server log" of what is being sent to the server, and from where. An example of the output from this line is `Received from 192.168.67.1#56855: udp is lazy`. The `#` sign is used by convention as a separator between the IP address and port number. We need to use the `.decode()` function to convert the arriving message to a string.
 
-		modifiedMessage = message.upper()
+			modifiedMessage = message.upper()
 
 This line is the heart of our simple application. It takes the line sent by the client and, after converting the message to a string, uses the method upper() to capitalize it.
 
-		serverSocket.sendto(modifiedMessage, clientAddress)
+			serverSocket.sendto(modifiedMessage, clientAddress)
 
 This last line attaches the client’s address (IP address and port number) to the capitalized message and sends the resulting packet into the server’s socket. (As mentioned earlier, the server address is also attached to the packet, although this is done automatically rather than explicitly by the code.) The Internet will then deliver the packet to this client address. After the server sends the packet, it remains in the while loop, waiting for another UDP packet to arrive (from any client running on any host).
 
@@ -329,10 +334,11 @@ Now let's take a look at the server program.
 		clientIP = str(addr[0])
 		clientPort = str(addr[1])
 		message = connectionSocket.recv(1024).decode()
-		print ("Received from " + clientIP + "#" + clientPort + ": " + message)
-		modifiedMessage = message.upper()
-		connectionSocket.send(modifiedMessage.encode())
-		connectionSocket.close()
+		if message:
+			print ("Received from " + clientIP + "#" + clientPort + ": " + message)
+			modifiedMessage = message.upper()
+			connectionSocket.send(modifiedMessage.encode())
+			connectionSocket.close()
 		
 Let’s now take a look at the lines that differ significantly from UDPServer and TCPClient. As with TCPClient, the server creates a TCP socket with:
 
