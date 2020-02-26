@@ -22,7 +22,8 @@ while 1:
 	clientIP = str(addr[0])
 	clientPort = str(addr[1])
 	message = connectionSocket.recv(1024).decode()
-	print ("Received from " + clientIP + "#" + clientPort + ": " + message)
-	modifiedMessage = message.upper()
-	connectionSocket.send(modifiedMessage.encode())
-	connectionSocket.close()
+	if message:
+		print ("Received from " + clientIP + "#" + clientPort + ": " + message)
+		modifiedMessage = message.upper()
+		connectionSocket.send(modifiedMessage.encode())
+		connectionSocket.close()
