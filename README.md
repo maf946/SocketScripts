@@ -298,7 +298,7 @@ Recall that before the client can send data to the server (or vice versa) using 
 
 The first line, as before, prompts the user for a message. The second line sends the `message` through the client’s socket and into the TCP connection. Note that the program does not explicitly create a packet and attach the destination address to the packet, as was the case with UDP sockets. Instead the client program simply drops the bytes in the string sentence into the TCP connection. The client then waits to receive bytes from the server.
 
-		modifiedMessage = clientSocket.recv(2048)
+		modifiedMessage = clientSocket.recv(1024)
 
 When characters arrive from the server, they get placed into the string `modifiedMessage`. Characters continue to accumulate in modifiedMessage until the line ends with a carriage return character. After printing the capitalized message, we close the client’s socket:
 
