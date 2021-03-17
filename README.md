@@ -80,7 +80,7 @@ Now let’s take a look at the various lines of code in UDPClient.py.
 
 The socket module forms the basis of all network communications in Python. By including this line, we will be able to create sockets within our program. 
 
-	serverIP = 127.0.0.1 #replace this number
+	serverIP = "127.0.0.1" #replace this number
 	serverPort = 5000 #replace this number
 
 These lines will be used to create the socket.

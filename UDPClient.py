@@ -1,6 +1,6 @@
 import socket
 
-serverIP = 127.0.0.1 #replace this number
+serverIP = "127.0.0.1" #replace this number
 serverPort = 5000 #replace this number
 
 print("I'm configured to send UDP packets to " + serverIP + " on port " + str(serverPort))
