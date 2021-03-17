@@ -43,7 +43,7 @@ The client program is called UDPClient.py, and the server program is called UDPS
 
 We will run the client and server as follows.
 
-First, open a terminal window and run `python3 UDPServer.py`. You should see something like the following as the output (you will almost certainly have a different IP address and port number):
+Create a PyCharm project and replace main.py with the code from UDPServer.py. You should see something like the following as the output (you will almost certainly have a different IP address and port number):
 
 	serverIP: 		192.168.0.118
 	serverPort: 	49957
@@ -51,9 +51,9 @@ First, open a terminal window and run `python3 UDPServer.py`. You should see som
 	
 Make note of the serverIP and serverPort values.
 
-Next, either open a second terminal window on your own machine; alternatively, work with a friend or classmate and have them run this on their machine, instead. This is designed to work on the Internet so any two Internet-connected machines should work!
+Next, create a second PyCharm project (I suggest opening it in a new window) for the UDP client; alternatively, work with a friend or classmate and have them run this on their machine, instead. This is designed to work on the Internet so any two Internet-connected machines should work!
 
-On the second terminal window, run `python3 UDPClient.py -ip [IP address] -p [port number]`, making sure to include the values provided by UDPServer.py. Based on the example from the prior step, the command to run would be `python3 UDPClient.py -ip 192.168.0.118 -p 49957`. You should see something like the following as the output:
+In the UDPClient.py source, make sure to replace the serverIP and serverPort values at the top with the values from UDPServer.py. You should see something like the following as the output:
 
 	I'm configured to send UDP packets to 192.168.0.118 on port 49957
 	Press Ctrl+Z to quit.
@@ -74,50 +74,16 @@ You can continue to run the client and server for as long as you wish. Press Ctr
 
 #### UDPClient.py
 
-Here is the code for the client side of the application:
-
-	import socket
-	import argparse
-
-	parser = argparse.ArgumentParser(description='Run a simple UDP client.')
-	parser.add_argument("--ipaddress", "-ip", help='IP address for UDP server')
-	parser.add_argument("--port", "-p", type=int, help='Port number on which server is running')
-	args = parser.parse_args()
-	serverIP = args.ipaddress
-	serverPort = args.port
-
-	print("I'm configured to send UDP packets to " + serverIP + " on port " + str(serverPort))
-	print ("Press Ctrl+Z to quit.")
-
-	while 1:	
-		clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)		
-		message = input("Input lowercase text: ")
-		clientSocket.sendto(message.encode(), (serverIP, serverPort))
-		modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
-		print ("Returned from server: " + modifiedMessage.decode())
-		clientSocket.close()
-		
 Now let’s take a look at the various lines of code in UDPClient.py.
 
 	import socket
 
 The socket module forms the basis of all network communications in Python. By including this line, we will be able to create sockets within our program. 
 
-	import argparse
-	
-The argparse module makes it easy for us to accept **arguments** when we launch our program. An argument is a parameter supplied to the program when it is invoked. For example, when we want to run a traceroute to ucla.edu, we run it by entering `traceroute ucla.edu`. In this case, `traceroute` is the command, and `ucla.edu` is the argument. As we write and test (and almost certainly debug) our code, it will be convenient for us to not have to manually enter the IP address and port number information each time we run the program. _Remember that from within the terminal you can re-run the last command simply by pressing the up arrow on your keyboard, then pressing Return._ This is also much better than hard-coding the IP address and port number into the script itself, for a variety of reasons. To see the documentation for our client, run `python3 UDPClient.py --help`.	
+	serverIP = 127.0.0.1 #replace this number
+	serverPort = 5000 #replace this number
 
-	parser = argparse.ArgumentParser(description='Run a simple UDP client.')
-	parser.add_argument("--ipaddress", "-ip", help='IP address for UDP server')
-	parser.add_argument("--port", "-p", type=int, help='Port number on which server is running')
-
-Don't worry too much about the details of these lines. Basically, they set up the documentation and structure of the arguments our program can accept. Most importantly, they establish that you can specify the `ipaddress` with `-ip` and `port` with `-p`.
-
-	args = parser.parse_args()
-	serverIP = args.ipaddress
-	serverPort = args.port
-	
-These lines take the `ipaddress` and `port` the user entered at the command line, and stores them in variables called `serverIP` and `serverPort`, respectively.
+These lines will be used to create the socket.
 
 	print("I'm configured to send UDP packets to " + str(serverIP) + " on port " + serverPort)
 	print ("Press Ctrl+Z to quit.")
@@ -126,7 +92,7 @@ Print messages to the user. Note that we use the `str()` function to convert the
 
 	while 1:
 	
-This line, and everything below it which is indented by a tab, is part of an infinite loop. Once the client is configured correctly, we want to continually prompt the user for input, then communicate over the network (recall that the user can quit by pressing Ctrl+Z, or just closing the terminal window). Note that **indentation in Python is very important**. Use tab characters with care, when warranted, and only when warranted.
+This line, and everything below it which is indented by a tab, is part of an infinite loop. Once the client is configured correctly, we want to continually prompt the user for input, then communicate over the network (recall that the user can quit by pressing Ctrl+Z, or just closing PyCharm). Note that **indentation in Python is very important**. Use tab characters with care, when warranted, and only when warranted.
 
 		clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)	
 
@@ -154,35 +120,7 @@ This line closes the socket. Since we are at the end of the `while 1:` block, we
 
 #### UDPServer.py
 
-Let’s now take a look at the server side of the application:
-
-	import socket
-
-	def get_ip_address():
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.connect(("8.8.8.8", 80))
-		return s.getsockname()[0]
-
-	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	serverSocket.bind(('', 0))
-
-	serverIP = get_ip_address()
-	serverPort = serverSocket.getsockname()[1]
-
-	print ("serverIP:\t" + serverIP)
-	print ("serverPort:\t" + str(serverPort))
-	print ("Press Ctrl+Z to quit. Listening...")
-
-	while 1:
-		message, clientAddress = serverSocket.recvfrom(2048)
-		if message: 
-			clientIP = str(clientAddress[0])
-			clientPort = str(clientAddress[1])
-			print ("Received from " + clientIP + "#" + clientPort + ": " + message.decode())
-			modifiedMessage = message.upper()
-			serverSocket.sendto(modifiedMessage, clientAddress)
-	
-As with UDPClient.py, we begin by importing the socket module.
+Let’s now take a look at the server side of the application. As with UDPClient.py, we begin by importing the socket module.
 
 		def get_ip_address():
 			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -259,30 +197,6 @@ We use the same simple client-server application to demonstrate socket programmi
 
 #### TCPClient.py
 
-Here is the code for the client side of the application:
-
-	import socket
-	import argparse
-
-	parser = argparse.ArgumentParser(description='Run a simple TCP client.')
-	parser.add_argument("--ipaddress", "-ip", help='IP address for TCP server')
-	parser.add_argument("--port", "-p", type=int, help='Port number on which server is running')
-	args = parser.parse_args()
-	serverIP = args.ipaddress
-	serverPort = args.port
-
-	print("I'm configured to send TCP packets to " + serverIP + " on port " + str(serverPort))
-	print ("Press Ctrl+Z to quit.")
-
-	while 1:
-		clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		clientSocket.connect((serverIP, serverPort))
-		message = input("Input lowercase text: ")
-		clientSocket.send(message.encode())
-		modifiedMessage = clientSocket.recv(1024)
-		print("Returned from server: " + modifiedMessage.decode())
-		clientSocket.close()
-		
 Let’s now take a look at the various lines in the code that differ significantly from the UDP implementation. The first such line is the creation of the client socket.
 
 		clientSocket = socket(AF_INET, SOCK_STREAM)
